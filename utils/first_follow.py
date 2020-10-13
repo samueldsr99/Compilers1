@@ -87,8 +87,36 @@ def compute_firsts(G):
     # First(Vt) + First(Vt) + First(RightSides)
     return firsts
 
+# def compute_follows(G,firsts):
+#     follows = {}
+#     change = True
+#     local_firsts = {}
+    
+#     for t in G.nonTerminals:
+#         follows[t] = ContainerSet()
+#     follows[G.startSymbol] = ContainerSet(G.EOF)
+    
+#     while change:
+#         change=False
+#         for production in G.Productions:
+#             X = production.Left
+#             alpha = production.Right
+            
+#             follow_X = follows[X]
+#             for i,sy in enumerate(alpha):
+#                 if sy.IsNonTerminal:
+#                     Q=follows[sy]
+#                     try:
+#                         first = local_firsts[alpha,i]
+#                     except:
+#                         first = local_firsts[alpha,i] = compute_local_first(firsts,islice(alpha,i+1,None))
+#                     change |= Q.update(first)
+#                     if first.contains_epsilon:
+#                         change |= Q.update(follow_X)
+#     return follows
+
 def compute_follows(G, firsts):
-    follows = { }
+    follows = {}
     change = True
     
     local_firsts = {}
@@ -107,7 +135,7 @@ def compute_follows(G, firsts):
             alpha = production.Right
             
             follow_X = follows[X]
-            
+
             ###################################################
             # X -> zeta Y beta
             # First(beta) - { epsilon } subset of Follow(Y)
@@ -116,22 +144,18 @@ def compute_follows(G, firsts):
             #                   <CODE_HERE>                   #
             ###################################################
 
-            Suf = Sentence()
-            for i in range(len(alpha) - 1, -1, -1):
-                w = alpha[i]
-                
-                if w.IsTerminal:
-                    Suf += w
-                    continue
-                
-                first = compute_local_first(firsts, Suf)
-                
-                change = follows[w].update(first)
-                
-                if first.contains_epsilon or i == len(alpha) - 1:
-                    change = follows[w].hard_update(follow_X)
-                
-                Suf += w
+            ##
+            for it, val in enumerate(alpha):
+                if val.IsNonTerminal:
+                    follows_val = follows[val]
+
+                    try:
+                        first = local_firsts[alpha, it]
+                    except:
+                        first = local_firsts[alpha, it] = compute_local_first(firsts, islice(alpha, it + 1, None))
+                    
+                    change |= follows_val.update(first)
+                    if first.contains_epsilon:
+                        change |= follows_val.update(follow_X)
             
-    # Follow(Vn)
     return follows
