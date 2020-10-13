@@ -87,34 +87,6 @@ def compute_firsts(G):
     # First(Vt) + First(Vt) + First(RightSides)
     return firsts
 
-# def compute_follows(G,firsts):
-#     follows = {}
-#     change = True
-#     local_firsts = {}
-    
-#     for t in G.nonTerminals:
-#         follows[t] = ContainerSet()
-#     follows[G.startSymbol] = ContainerSet(G.EOF)
-    
-#     while change:
-#         change=False
-#         for production in G.Productions:
-#             X = production.Left
-#             alpha = production.Right
-            
-#             follow_X = follows[X]
-#             for i,sy in enumerate(alpha):
-#                 if sy.IsNonTerminal:
-#                     Q=follows[sy]
-#                     try:
-#                         first = local_firsts[alpha,i]
-#                     except:
-#                         first = local_firsts[alpha,i] = compute_local_first(firsts,islice(alpha,i+1,None))
-#                     change |= Q.update(first)
-#                     if first.contains_epsilon:
-#                         change |= Q.update(follow_X)
-#     return follows
-
 def compute_follows(G, firsts):
     follows = {}
     change = True
