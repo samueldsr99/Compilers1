@@ -1,0 +1,5 @@
+<expression>
++ term
+X
+<expression> -> <expression> + term
+<expression> -> term

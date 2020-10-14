@@ -1,0 +1,4 @@
+S
+a b c
+X
+S -> S a | b | c

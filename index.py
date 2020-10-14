@@ -7,14 +7,18 @@ import pandas as pd
 # utils
 from utils import grammar_processing as gp
 from utils.first_follow import compute_firsts, compute_follows
+from utils.parser import isLL1, build_parsing_table, metodo_predictivo_no_recursivo
+from utils.grammar_cleaner import remove_left_recursion, remove_epsilon, remove_unit, remove_vars_nothing, remove_unreachable
+from utils.grammar_cleaner import GrammarPipeline
+from utils.tokenizer import tokenize
 
 st.title('Compilacion: Proyecto 1')
 
 choices = [
     'Insertar Gramatica',
     'Detalles de la gramatica',
-    'Calcular First & Follows',
-    'Parsear con metodo predictivo no recursivo',
+    'Calcular Firsts & Follows',
+    'Parsear con método predictivo no recursivo',
 ]
 
 choice = st.sidebar.radio('Seleccione una opcion:', choices)
@@ -28,7 +32,7 @@ if choice == choices[0]:
 
     if st.button('Insertar gramatica'):
         # Basic parsing
-        if initial and terminals and non_terminals and productions:
+        if initial and terminals and productions:
             initial = gp.normalize(initial)
             terminals = gp.normalize(terminals)
             non_terminals = gp.normalize(non_terminals)
@@ -40,7 +44,7 @@ if choice == choices[0]:
             st.error('Quedan parametros por definir')
 
 # Detalles de la gramatica
-if choice == choices[1]:
+elif choice == choices[1]:
     result = gp.load_grammar()
     if result[0]:
         st.error('No se ha definido una gramatica o la gramatica definida no es correcta')
@@ -57,7 +61,13 @@ if choice == choices[1]:
         for i in G.Productions:
             st.text(str(i.Left) + " -> " + str(i.Right))
 
-if choice == choices[2]:
+        if (isLL1(G)):
+            st.success('La gramática es LL(1)')
+        else:
+            st.warning('La gramática no es LL(1)')
+
+# Calcular Firsts & Follows
+elif choice == choices[2]:
     result = gp.load_grammar()
     if result[0]:
         st.error('No se ha definido una gramatica o la gramatica definida no es correcta')
@@ -82,10 +92,60 @@ if choice == choices[2]:
             'values': follows.values()
         }))
 
-        # for item in firsts:
-        #     st.text("{}: {}".format(str(item), str(firsts[item])))
+# Parsear con metodo predictivo no recursivo
+elif choice == choices[3]:
+    result = gp.load_grammar()
+    if result[0]:
+        st.error('No se ha definido una gramatica o la gramatica definida no es correcta')
+        st.error('Errors: ' + str(result[1]))
+    else:
+        G = result[1]
 
-        # st.subheader('Follows:')
+        if not isLL1(G):
+            st.error('La grámatica definida no es LL(1), no se puede aplicar este algoritmo de parsing')
+        else:        
+            firsts = compute_firsts(G)
+            follows = compute_follows(G, firsts)
+            M = build_parsing_table(G, firsts, follows)
+            
+            rows, columns = set(), set()
+            matrix = []
 
-        # for item in follows:
-        #     st.text("{}: {}".format(str(item), str(follows[item])))
+            for item in M:
+                rows.add(item[0])
+                columns.add(item[1])
+            
+            for row in rows:
+                matrix.append([])
+                for column in columns:
+                    try:
+                        production = M[row, column][0]
+                        matrix[-1].append(str(production.Left) + ' -> ' + str(production.Right))
+                    except KeyError:
+                        matrix[-1].append(' ')
+
+            st.subheader('Tabla de parsing')
+
+            frame = pd.DataFrame(matrix, index=rows, columns=columns)
+            st.write(frame)
+
+            # Parsing
+            st.subheader("Inserte la cadena a parsear")
+            w = st.text_area('')
+            
+            if st.button("Parsear"):
+                parser = metodo_predictivo_no_recursivo(G, M)
+
+                tokens = tokenize(G, w)
+                
+                if isinstance(tokens, list):
+                    left_parse = parser(tokens)
+                    if not left_parse:
+                        st.error("Error en parsing. La cadena no pertenece al lenguaje.")
+                    else:
+                        st.success("OK")
+                        st.subheader("Producciones a aplicar:")
+                        for production in left_parse:
+                            st.text(str(production.Left) + " -> " + str(production.Right))
+                else:
+                    st.error("Error en tokenize: " + tokens)

@@ -39,6 +39,17 @@ def load_grammar():
 
     return G
 
+def has_left_recursion(G):
+    """
+    True is Grammar has Left Recursion
+    """
+
+    for nt in G.nonTerminals:
+        if any(not production.IsEpsilon and production.Left == production.Right[0] for production in nt.productions):
+            return True
+
+    return False
+
 def normalize(s):
     """
     append \n from string

@@ -5,17 +5,26 @@ import pandas as pd
 
 from utils import grammar_processing as gp
 from utils.first_follow import compute_firsts, compute_follows
+from utils.grammar_cleaner import remove_left_recursion, remove_epsilon, remove_unit, remove_vars_nothing, remove_unreachable, remove_ambiguity, GrammarPipeline
+from utils.tokenizer import tokenize
 
-# Testing First & Follows
 G = gp.load_grammar()[1]
 
-firsts = compute_firsts(G)
-follows = compute_follows(G, firsts)
+# print(tokenize(G, 'int + int * ( int * int + int )'))
 
-print('Firsts:')
-for item in firsts.items():
-    print(item)
+# print('Before:')
+# print(G)
 
-print('Follows:')
-for item in follows.items():
-    print(item)
+# GrammarPipeline(G, [
+#     remove_epsilon,
+#     remove_unit,
+#     remove_vars_nothing,
+#     remove_unreachable,
+#     remove_left_recursion,
+#     remove_ambiguity,
+# ]).run()
+
+# print('After:')
+# print(G)
+
+print(gp.has_left_recursion(G))
