@@ -40,7 +40,8 @@ def parse_grammar(initial, terminals, non_terminals, productions):
         f[terminal] = G.Terminal(terminal)
     
     for non_terminal in non_terminals.split(' '):
-        f[non_terminal] = G.NonTerminal(non_terminal)
+        if non_terminal != f[initial].Name:
+            f[non_terminal] = G.NonTerminal(non_terminal)
     
     # Parsing productions
     for production in productions:

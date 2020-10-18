@@ -1,5 +1,5 @@
-S
-a b
-X
-S -> a | epsilon
-X -> a
+<expression>
++ term
+<expression> X
+<expression> -> <expression> + term
+<expression> -> term

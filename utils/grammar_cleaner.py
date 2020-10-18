@@ -106,8 +106,8 @@ def remove_unit(G: Grammar):
                     pass            # that is not in variables' keys (is not left part of a unit prod)
             if l != len(variables[v]):
                 change = True
-    for x in variables.items():
-        print(x)
+    # for x in variables.items():
+    #     print(x)
     
     for v in variables:
         for s in variables[v]:
@@ -165,7 +165,7 @@ def remove_vars_nothing(G: Grammar):
         if v not in accepted:
             G.nonTerminals.remove(G[v])
             G.symbDict.pop(v)
-    print(prods)
+    # print(prods)
 
 
 def remove_unreachable(G: Grammar):

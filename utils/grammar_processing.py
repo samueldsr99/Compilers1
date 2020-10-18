@@ -41,14 +41,16 @@ def load_grammar():
 
 def has_left_recursion(G):
     """
-    True is Grammar has Left Recursion
+    Check if Grammar has Left Recursion
+    Returns production if True, None elsewhere
     """
 
     for nt in G.nonTerminals:
-        if any(not production.IsEpsilon and production.Left == production.Right[0] for production in nt.productions):
-            return True
+        for production in nt.productions:
+            if not production.IsEpsilon and production.Left == production.Right[0]:
+                return production
 
-    return False
+    return None
 
 def normalize(s):
     """
@@ -59,3 +61,14 @@ def normalize(s):
         s += '\n'
     
     return s
+
+def is_regular(G: Grammar) -> bool:
+    """
+    Checks if grammar `G` is regular.
+    """
+    # Maybe can be ommited left part checking
+    for prod in G.Productions:
+        if len(prod.Left) != 1 or type(prod.Left) is not NonTerminal or \
+        len(prod.Right) not in (1, 2) or Terminal not in (type(sym) for sym in prod.Right):
+            return False
+    return True

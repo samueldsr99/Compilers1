@@ -135,4 +135,4 @@ def simplify(regex):
     return ret[:-1]
 
 print(regex)
-print(simplify(regex))
+print(simplify(regex))w

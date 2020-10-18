@@ -8,7 +8,7 @@ import pandas as pd
 from utils import grammar_processing as gp
 from utils.first_follow import compute_firsts, compute_follows
 from utils.parser import isLL1, build_parsing_table, metodo_predictivo_no_recursivo
-from utils.grammar_cleaner import remove_left_recursion, remove_epsilon, remove_unit, remove_vars_nothing, remove_unreachable
+from utils.grammar_cleaner import remove_left_recursion, remove_epsilon, remove_unit, remove_vars_nothing, remove_unreachable, remove_ambiguity
 from utils.grammar_cleaner import GrammarPipeline
 from utils.tokenizer import tokenize
 
@@ -21,13 +21,22 @@ choices = [
     'Parsear con método predictivo no recursivo',
 ]
 
+def render_grammar(G, name='G'):
+    st.subheader('No terminales:')
+    st.text(str(G.nonTerminals))
+    st.subheader('Terminales:')
+    st.text('\t' + str(G.terminals))
+    st.subheader('Producciones:\n')
+    for i in G.Productions:
+        st.text(str(i.Left) + " -> " + str(i.Right))
+
 choice = st.sidebar.radio('Seleccione una opcion:', choices)
 
 # Insertar gramatica
 if choice == choices[0]:
     initial = st.text_area('Inserte el no terminal inicial')
     terminals = st.text_area('Inserte los terminales separados por espacio')
-    non_terminals = st.text_area('Inserte los no terminales separados por espacio (No insertar el no terminal inicial)')
+    non_terminals = st.text_area('Inserte los no terminales separados por espacio (incluyendo el no terminal inicial)')
     productions = st.text_area('Inserte las producciones de su gramatica')
 
     if st.button('Insertar gramatica'):
@@ -53,18 +62,27 @@ elif choice == choices[1]:
         G = result[1]
 
         st.header('Detalles de la gramatica:')
-        st.subheader('No terminales:')
-        st.text(str(G.nonTerminals))
-        st.subheader('Terminales:')
-        st.text('\t' + str(G.terminals))
-        st.subheader('Producciones:\n')
-        for i in G.Productions:
-            st.text(str(i.Left) + " -> " + str(i.Right))
+        render_grammar(G, 'G')
 
-        if (isLL1(G)):
-            st.success('La gramática es LL(1)')
-        else:
+        lr_result = gp.has_left_recursion(G)
+        if lr_result:
+            st.warning('La gramática tiene recursión izquierda: {} -> {}'.format(lr_result.Left, lr_result.Right))
+        elif (not isLL1(G)):
             st.warning('La gramática no es LL(1)')
+        else:
+            st.success('La gramática es LL(1)')
+
+        new_G = G.copy()
+        GrammarPipeline(new_G, [
+            remove_epsilon,
+            remove_unit,
+            remove_vars_nothing,
+            remove_unreachable,
+            remove_left_recursion,
+            remove_ambiguity,
+        ]).run()
+        st.header('Gramática transformada:')
+        render_grammar(new_G, "G'")
 
 # Calcular Firsts & Follows
 elif choice == choices[2]:

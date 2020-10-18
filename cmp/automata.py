@@ -205,3 +205,4 @@ def lr0_formatter(state):
         return '\n'.join(str(item)[:-4] for item in state)
     except TypeError:
         return str(state)[:-4]
+        
