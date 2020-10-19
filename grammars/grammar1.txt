@@ -1,6 +1,6 @@
 E
 int * + ( )
-T X Y
+E T X Y
 E -> T X
 X -> + E | epsilon
 T -> int Y | ( E )

@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import altair as alt
 import pandas as pd
+import os
+import re
 
 # utils
 from utils import grammar_processing as gp
@@ -11,6 +13,7 @@ from utils.parser import isLL1, build_parsing_table, metodo_predictivo_no_recurs
 from utils.grammar_cleaner import remove_left_recursion, remove_epsilon, remove_unit, remove_vars_nothing, remove_unreachable, remove_ambiguity
 from utils.grammar_cleaner import GrammarPipeline
 from utils.tokenizer import tokenize
+from utils.NFA import NFA
 
 st.title('Compilacion: Proyecto 1')
 
@@ -19,6 +22,7 @@ choices = [
     'Detalles de la gramatica',
     'Calcular Firsts & Follows',
     'Parsear con método predictivo no recursivo',
+    'Visualizar autómata'
 ]
 
 def render_grammar(G, name='G'):
@@ -28,7 +32,9 @@ def render_grammar(G, name='G'):
     st.text('\t' + str(G.terminals))
     st.subheader('Producciones:\n')
     for i in G.Productions:
-        st.text(str(i.Left) + " -> " + str(i.Right))
+        left = i.Left
+        right = 'epsilon' if i.IsEpsilon else i.Right
+        st.text(str(left) + " -> " + str(right))
 
 choice = st.sidebar.radio('Seleccione una opcion:', choices)
 
@@ -83,6 +89,10 @@ elif choice == choices[1]:
         ]).run()
         st.header('Gramática transformada:')
         render_grammar(new_G, "G'")
+        if isLL1(new_G):
+            st.success('La gramática transformada es LL(1).')
+        else:
+            st.error('La gramática transformada tampoco es LL(1).')
 
 # Calcular Firsts & Follows
 elif choice == choices[2]:
@@ -167,3 +177,41 @@ elif choice == choices[3]:
                             st.text(str(production.Left) + " -> " + str(production.Right))
                 else:
                     st.error("Error en tokenize: " + tokens)
+
+# Visualizar autómata
+elif choice == choices[4]:
+    result = gp.load_grammar()
+    if result[0]:
+        st.error('No se ha definido una gramatica o la gramatica definida no es correcta')
+        st.error('Errors: ' + str(result[1]))
+    elif not gp.is_regular(result[1]):
+        st.error('La gramática definida no es regular.')
+    else:
+        G = result[1]
+
+        dfa = gp.grammar_to_dfa(G)
+        extended = NFA.extend_automaton(dfa)
+
+        dfa.graph().write_png(os.path.join('data', 'dfa.png'))
+        extended.graph().write_png(os.path.join('data', 'ext.png'))
+
+        st.subheader('Autómata finito determinista obtenido de la gramática:')
+        st.image(os.path.join('data', 'dfa.png'))
+
+        st.subheader('Autómata extendido para hallar la expresión regular:')
+        st.image(os.path.join('data', 'ext.png'))
+
+        regex = extended.get_regex()
+
+        st.subheader('Expresión regular:')
+        st.text('{}'.format(regex))
+
+        st.subheader('Verificar expresión regular:')
+        txt = st.text_area('')
+
+        if st.button('Verificar'):
+            match = re.fullmatch(regex, txt)
+            if not match or match.end() != len(txt):
+                st.error('El texto introducido no pertenece al lenguaje.')
+            else:
+                st.success('OK')

@@ -2,6 +2,8 @@
 Utils for processing grammars
 """
 from .parse_grammar import parse_grammar
+from cmp.pycompiler import Grammar, NonTerminal, Terminal
+from utils.NFA import NFA
 
 def insert_grammar(initial, terminals, non_terminals, productions):
     """
@@ -68,7 +70,54 @@ def is_regular(G: Grammar) -> bool:
     """
     # Maybe can be ommited left part checking
     for prod in G.Productions:
-        if len(prod.Left) != 1 or type(prod.Left) is not NonTerminal or \
-        len(prod.Right) not in (1, 2) or Terminal not in (type(sym) for sym in prod.Right):
+        if prod.IsEpsilon:
+            continue
+        # this was made for debugging reasons
+        if len(prod.Left) != 1:
             return False
+        if type(prod.Left) is not NonTerminal:
+            return False
+        if len(prod.Right) not in (1, 2):
+            return False
+        if Terminal not in (type(sym) for sym in prod.Right):
+            return False
+        # if len(prod.Left) != 1 or type(prod.Left) is not NonTerminal or \
+        # len(prod.Right) not in (1, 2) or Terminal not in (type(sym) for sym in prod.Right):
+        #     print('here {}'.format(prod))
+        #     return False
     return True
+
+def grammar_to_dfa(G: Grammar):
+    """
+    Converts a regular grammar to a DFA.
+    """
+    assert is_regular(G), 'Grammar is not Regular'
+
+    mapping = {nonTerm: value for nonTerm, value in zip(G.nonTerminals, range(len(G.nonTerminals)))}
+    transitions = {}
+    final = len(G.nonTerminals)
+    for prod in G.Productions:
+        if prod.IsEpsilon:
+            symbol = ''
+            go_state = final
+        elif prod.Right[0].IsTerminal:
+            symbol = prod.Right[0].Name
+            if len(prod.Right) == 1:
+                go_state = final
+            else:
+                go_state = mapping[prod.Right[1]]
+        else:
+            symbol = prod.Right[1].Name
+            go_state = mapping[prod.Right[0]]
+        try:
+            transitions[(mapping[prod.Left], symbol)].append(go_state)
+        except KeyError:
+            transitions[(mapping[prod.Left], symbol)] = [go_state]
+        # print(mapping[prod.Left], symbol, '->', go_state,)
+    nfa = NFA(
+        states=final + 1,
+        finals=[final],
+        transitions=transitions,
+        start=mapping[G.startSymbol]
+    )
+    return nfa.to_dfa()

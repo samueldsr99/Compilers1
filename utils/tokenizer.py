@@ -7,6 +7,9 @@ def tokenize(G, w):
     """
     tokenize a string w based on Grammar non terminals
     """
+    if not w:
+        return [G.EOF]
+
     w = normalize(w)
     w = w[:-1].split(' ')
     

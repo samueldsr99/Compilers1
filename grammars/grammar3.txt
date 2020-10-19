@@ -1,4 +1,4 @@
 S
 a b c
-X
+S X
 S -> S a | b | c

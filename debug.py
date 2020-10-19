@@ -29,7 +29,8 @@ G = gp.load_grammar()[1]
 
 # Testing automatons
 
-from NFA import NFA
+from utils.NFA import NFA
+from utils.DFA import DFA
 import pydot
 import numpy as np
 
@@ -39,100 +40,49 @@ import numpy as np
 #     (2, 'b'): [1],
 #     (1, 'b'): [0]
 # })
-automaton = NFA(states=3, finals=[2], transitions={
-    (0,'a'): [ 0 ],
-    (0,'b'): [ 0, 1 ],
-    (1,'a'): [ 2 ],
-    (1,'b'): [ 2 ],
+automaton = NFA(states=6, finals=[3, 5], transitions={
+    (0, ''): [ 1, 2 ],
+    (1, ''): [ 3 ],
+    (1,'b'): [ 4 ],
+    (2,'a'): [ 4 ],
+    (3,'c'): [ 3 ],
+    (4, ''): [ 5 ],
+    (5,'d'): [ 5 ]
 })
 
 automaton.graph().write_png('automaton.png')
 
-def create_matrix(r, c):
-    ret = []
-    for i in range(r):
-        ret.append([])
+dfa = automaton.to_dfa()
 
-        for j in range(c):
-            ret[i].append([''])
+dfa.graph().write_png('to_dfa.png')
+print(automaton.finals)
 
-    return ret
+new = NFA.extend_automaton(automaton)
 
-matrix = create_matrix(automaton.states, automaton.states)
-nmatrix = create_matrix(automaton.states, automaton.states)
+new.graph().write_png('extended.png')
 
-# initialize matrix
-for i in range(automaton.states):
-    for j in range(automaton.states):
-        
-        checked = False
-        for symbol, nstates in automaton.transitions[i].items():
-            if nstates[0] == j:
-                matrix[i][j] = symbol
-                checked = True
-                break
+adj_list = {}
+r_adj_list = {}
+new._build_adj_list(adj_list, r_adj_list)
 
-        if not checked:
-            matrix[i][j] = ''
+print('adj_list:', adj_list)
+print('r_adj_list:', r_adj_list)
 
-for i in range(automaton.states):
-    for j in range(automaton.states):
-        for k in range(automaton.states):
-            ajk = matrix[j][k]
-            aji = matrix[j][i]
-            aii = matrix[i][i]
-            aik = matrix[i][k]
-            aij = matrix[i][j]
-
-            bjk = ajk
-            if aji or aii or aik:
-                if ajk:
-                    bjk += '|'
-            
-            if aji:
-                bjk += aji
-            
-            if aii:
-                bjk += '(' + aii + ')*'
-            
-            if aik:
-                bjk += aik
-            
-            bij = ''
-            if aii:
-                bij = '(' + aii + ')*'
-            bij += aij
-
-            nmatrix[j][k] = bjk
-            nmatrix[i][j] = bij
-
-    matrix = nmatrix
-    nmatrix = create_matrix(automaton.states, automaton.states)
-
-
-# for i in matrix:
-#     for j in i:
-#         if j == '':
-#             print('0', end=' ')
-#         else:
-#             print(j, end=' ')
-#     print()
-
-regex = matrix[0][0]
-
-def simplify(regex):
-    ors = regex.split('|')
-
-    seen = set()
-
-    ret = ''
-    for i in ors:
-        if not i in seen:
-            ret += i
-            seen.add(i)
-            ret += "|"
-
-    return ret[:-1]
-
+regex = new.to_regex()
 print(regex)
-print(simplify(regex))
+
+# testing the regex obtained
+import re
+
+tests = [
+    'bdddddd',
+    'addddddddd',
+    'a',
+    'b',
+    'c',
+    'ccccc',
+    '',
+]
+for t in tests:
+    print(re.fullmatch(regex, t))
+    assert re.fullmatch(regex, t).end() == len(t)
