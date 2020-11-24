@@ -1,4 +1,5 @@
-from cmp.pycompiler import Production, Sentence, Symbol, EOF, Epsilon
+from cmp.pycompiler import EOF, Epsilon, Production, Sentence, Symbol
+
 
 class ContainerSet:
     def __init__(self, *values, contains_epsilon=False):

@@ -1,5 +1,6 @@
 from .NFA import NFA
 
+
 class DFA(NFA):
     
     def __init__(self, states, finals, transitions, start=0):

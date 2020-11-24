@@ -1,6 +1,7 @@
-from cmp.pycompiler import Sentence, Production
-from cmp.utils import ContainerSet, Token, UnknownToken
+from cmp.pycompiler import Production, Sentence
 from cmp.tools import build_parsing_table, metodo_predictivo_no_recursivo
+from cmp.utils import ContainerSet, Token, UnknownToken
+
 
 class BasicXCool:
     def __init__(self, G):

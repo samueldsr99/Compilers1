@@ -2,7 +2,9 @@
 Parsers & utils for parsers
 """
 
-from utils.first_follow import compute_local_first, compute_firsts, compute_follows
+from utils.first_follow import (compute_firsts, compute_follows,
+                                compute_local_first)
+
 
 def build_parsing_table(G, firsts, follows):
     # init parsing table

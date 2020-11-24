@@ -1,5 +1,6 @@
 import cmp.visitor as visitor
 
+
 def get_printer(ConstantNumberNode, BinaryNode):
 
     class PrintVisitor(object):

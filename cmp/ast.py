@@ -1,5 +1,6 @@
 import cmp.visitor as visitor
 
+
 class Node:
     def evaluate(self):
         raise NotImplementedError()

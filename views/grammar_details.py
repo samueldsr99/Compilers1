@@ -1,6 +1,9 @@
 """
 Grammar Details Section
 """
+import os
+import re
+
 import streamlit as st
 
 import utils.grammar_processing as gp
@@ -8,7 +11,7 @@ from utils.grammar_cleaner import (GrammarPipeline, remove_ambiguity,
                                    remove_epsilon, remove_left_recursion,
                                    remove_unit, remove_unreachable,
                                    remove_vars_nothing)
-from utils.parser import isLL1
+from utils.NFA import NFA
 
 
 def render_grammar(G, name='G'):
@@ -23,41 +26,86 @@ def render_grammar(G, name='G'):
         st.text(str(left) + " -> " + str(right))
 
 
+def render_regular_automaton(G):
+    """
+    Shows regular automaton for Grammar G
+    """
+    st.title('Autómata Regular')
+    if not gp.is_regular(G):
+        st.error('La gramática definida no es regular.')
+        return
+
+    dfa = gp.grammar_to_dfa(G)
+    extended = NFA.extend_automaton(dfa)
+
+    dfa.graph().write_png(os.path.join('data', 'dfa.png'))
+    extended.graph().write_png(os.path.join('data', 'ext.png'))
+
+    st.subheader('Autómata finito determinista obtenido de la gramática:')
+    st.image(os.path.join('data', 'dfa.png'))
+
+    st.subheader('Autómata extendido para hallar la expresión regular:')
+    st.image(os.path.join('data', 'ext.png'))
+
+    regex = extended.get_regex()
+
+    st.subheader('Expresión regular:')
+    st.text('{}'.format(regex))
+
+    txt = st.text_input('Verificar expresión regular:')
+
+    if st.button('Verificar'):
+        match = re.fullmatch(regex, txt)
+        if not match or match.end() != len(txt):
+            st.error('La cadena no pertenece al lenguaje.')
+        else:
+            st.success('OK')
+
+
 def grammar_details():
     result = gp.load_grammar()
     if result[0]:
         st.error('No se ha definido una gramatica\
              o la gramatica definida no es correcta')
         st.error('Errors: ' + str(result[1]))
-    else:
-        G = result[1]
+        return
 
-        st.header('Detalles de la gramatica:')
-        render_grammar(G, 'G')
+    G = result[1]
 
-        lr_result = gp.has_left_recursion(G)
-        if lr_result:
-            st.warning('La gramática tiene recursión izquierda:\
-                 {} -> {}'.format(lr_result.Left, lr_result.Right))
-        elif (not isLL1(G)):
-            st.warning('La gramática no es LL(1)')
-        else:
-            st.success('La gramática es LL(1)')
+    st.header('Detalles de la gramatica:')
 
+    options = [
+        'Gramática',
+        'Gramática simplificada',
+    ]
+    selected = st.selectbox('', options)
+
+    if options[0] == selected:
+        st.markdown('# Gramática original')
+        render_grammar(G)
+    elif options[1] == selected:
+        st.markdown('# Gramática simplificada\n\
+            * Sin recursión izquierda inmediata\n\
+            * Sin producciones innecesarias\n\
+            * Sin prefijos comunes')
         new_G = G.copy()
-        GrammarPipeline(new_G, [
+        pipeline = GrammarPipeline(new_G, [
             remove_epsilon,
             remove_unit,
             remove_vars_nothing,
             remove_unreachable,
             remove_left_recursion,
-            remove_ambiguity,
-        ]).run()
-        st.header('Gramática transformada\
-        (sin recursión izquierda inmediata, prefijos comunes\
-        y producciones innecesarias)')
-        render_grammar(new_G, "G'")
-        if isLL1(new_G):
-            st.success('La gramática transformada es LL(1).')
-        else:
-            st.error('La gramática transformada tampoco es LL(1).')
+            remove_ambiguity
+        ])
+
+        pipeline.run()
+        render_grammar(new_G)
+
+    if options[0] == selected:
+        lr_result = gp.has_left_recursion(G)
+        if lr_result:
+            st.warning('La gramática tiene recursión izquierda:\
+                    {} -> {}'.format(lr_result.Left, lr_result.Right))
+
+    if st.checkbox('Autómata Regular'):
+        render_regular_automaton(G)

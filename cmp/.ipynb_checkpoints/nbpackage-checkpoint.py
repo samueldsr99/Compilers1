@@ -1,8 +1,12 @@
-import io, os, sys, types
+import io
+import os
+import sys
+import types
 
 from IPython import get_ipython
-from nbformat import read
 from IPython.core.interactiveshell import InteractiveShell
+from nbformat import read
+
 
 def find_notebook(fullname, path=None):
     """find a notebook, given its fully qualified name and an optional path

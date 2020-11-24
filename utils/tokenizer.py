@@ -3,6 +3,7 @@ Simple tokenizer
 """
 from utils.grammar_processing import normalize
 
+
 def tokenize(G, w):
     """
     tokenize a string w based on Grammar non terminals

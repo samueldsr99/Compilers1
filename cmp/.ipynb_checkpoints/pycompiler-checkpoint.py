@@ -1,5 +1,6 @@
 import json
 
+
 class Symbol(object):
 
     def __init__(self, name, grammar):

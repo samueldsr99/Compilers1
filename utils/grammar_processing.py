@@ -1,15 +1,17 @@
 """
 Utils for processing grammars
 """
-from .parse_grammar import parse_grammar
 from cmp.pycompiler import Grammar, NonTerminal, Terminal
 from utils.NFA import NFA
+
+from .parse_grammar import parse_grammar
+
 
 def insert_grammar(initial, terminals, non_terminals, productions):
     """
     Insert grammar info and saves it in data folder to make persistent
     """
-    
+
     out = open('data/grammar.txt', 'w')
 
     for i in [initial, terminals, non_terminals, productions]:

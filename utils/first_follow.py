@@ -2,9 +2,11 @@
 utils for computing First & Follow
 """
 
-from cmp.utils import ContainerSet
 from itertools import islice
+
 from cmp.pycompiler import Sentence, SentenceList
+from cmp.utils import ContainerSet
+
 
 # Computes First(alpha), given First(Vt) and First(Vn) 
 # alpha in (Vt U Vn)*

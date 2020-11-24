@@ -5,7 +5,10 @@ import pandas as pd
 
 from utils import grammar_processing as gp
 from utils.first_follow import compute_firsts, compute_follows
-from utils.grammar_cleaner import remove_left_recursion, remove_epsilon, remove_unit, remove_vars_nothing, remove_unreachable, remove_ambiguity, GrammarPipeline
+from utils.grammar_cleaner import (GrammarPipeline, remove_ambiguity,
+                                   remove_epsilon, remove_left_recursion,
+                                   remove_unit, remove_unreachable,
+                                   remove_vars_nothing)
 from utils.tokenizer import tokenize
 
 G = gp.load_grammar()[1]
@@ -29,10 +32,11 @@ G = gp.load_grammar()[1]
 
 # Testing automatons
 
-from utils.NFA import NFA
-from utils.DFA import DFA
-import pydot
 import numpy as np
+import pydot
+
+from utils.DFA import DFA
+from utils.NFA import NFA
 
 # automaton = NFA(states=3, finals=[1], transitions={
 #     (0, 'a'): [1],

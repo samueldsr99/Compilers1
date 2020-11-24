@@ -5,6 +5,7 @@ except:
 
 from cmp.utils import ContainerSet
 
+
 class NFA:
     def __init__(self, states, finals, transitions, start=0):
         self.states = states

@@ -2,7 +2,8 @@
 
 """
 import itertools as it
-from cmp.pycompiler import Grammar, Production, Sentence, NonTerminal
+
+from cmp.pycompiler import Grammar, NonTerminal, Production, Sentence
 
 
 def remove_epsilon(G: Grammar):
@@ -284,7 +285,7 @@ def remove_ambiguity(G: Grammar):
                         prods.remove(p)
                     prods.append(Production(nt, Sentence(p.Right[0], new_left)))
                     change = True
-        
+
         # Replacing old productions by new productions
         G.Productions = []          # Clean grammar productions
         for nt in G.nonTerminals:   # Clean non terminals productions
@@ -297,7 +298,13 @@ class GrammarPipeline():
     def __init__(self, G: Grammar, methods: []):
         self.G = G
         self.methods = methods
-    
+
     def run(self):
         for f in self.methods:
             f(self.G)
+
+    def push(self, method):
+        self.methods.append(method)
+
+    def pop(self):
+        self.methods.pop()

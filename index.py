@@ -1,20 +1,22 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-import altair as alt
-import pandas as pd
 import os
 import re
+
+import altair as alt
+import numpy as np
+import pandas as pd
+import streamlit as st
 
 # utils
 from utils import grammar_processing as gp
 from utils.first_follow import compute_firsts, compute_follows
-from utils.parser import isLL1, build_parsing_table, metodo_predictivo_no_recursivo
-from utils.grammar_cleaner import remove_left_recursion, remove_epsilon, remove_unit, remove_vars_nothing, remove_unreachable, remove_ambiguity
-from utils.grammar_cleaner import GrammarPipeline
-from utils.tokenizer import tokenize
+from utils.grammar_cleaner import (GrammarPipeline, remove_ambiguity,
+                                   remove_epsilon, remove_left_recursion,
+                                   remove_unit, remove_unreachable,
+                                   remove_vars_nothing)
 from utils.NFA import NFA
-
+from utils.parser import (build_parsing_table, isLL1,
+                          metodo_predictivo_no_recursivo)
+from utils.tokenizer import tokenize
 
 st.title('Compilacion: Proyecto 1')
 

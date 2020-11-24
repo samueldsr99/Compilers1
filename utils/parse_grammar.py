@@ -9,19 +9,13 @@ productions: Terminal -> non_terminals
     example: A -> b
 """
 
-# Grammar modules
-from cmp.pycompiler import Symbol
-from cmp.pycompiler import NonTerminal
-from cmp.pycompiler import Terminal
-from cmp.pycompiler import EOF
-from cmp.pycompiler import Sentence, SentenceList
-from cmp.pycompiler import Epsilon
-from cmp.pycompiler import Production
-from cmp.pycompiler import Grammar
-from cmp.utils import pprint, inspect
-
 # Debug
 import streamlit as st
+
+# Grammar modules
+from cmp.pycompiler import (EOF, Epsilon, Grammar, NonTerminal, Production,
+                            Sentence, SentenceList, Symbol, Terminal)
+from cmp.utils import inspect, pprint
 
 f = {}
 errors = []
