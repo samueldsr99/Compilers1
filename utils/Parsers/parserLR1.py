@@ -37,6 +37,7 @@ def compress(items):
 
 
 def closure_lr1(items, firsts):
+    print('items', items, type(items))
     closure = ContainerSet(*items)
 
     changed = True

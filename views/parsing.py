@@ -9,6 +9,8 @@ from utils.render import LL1_to_dataframe, LR_table_to_dataframe
 from utils.tokenizer import tokenize
 from utils.Parsers.parserLR1 import LR1Parser, build_LR1_automaton
 from utils.Parsers.parserSLR1 import SLR1Parser, build_LR0_automaton
+from utils.Parsers.parserLALR1 import LALRParser, build_lalr_automaton
+
 
 def render_parser(G, algorithm: str, parser):
     """
@@ -173,4 +175,45 @@ def parser_SLR1():
 
 
 def parser_LALR1():
-    pass
+    """
+    LALR(1) Subsection
+    """
+    st.title('Parser LALR(1)')
+
+    result = gp.load_grammar()
+    if result[0]:
+        st.error('No se ha definido una gramatica\
+            o la gramatica definida no es correcta')
+        return
+
+    G = result[1]
+    lalr1_parser = LALRParser(G)
+    # try:
+    #     lalr1_parser = LALRParser(G)
+    # except Exception:
+    #     st.error('La gramática definida tiene conflictos\
+    #         Shift-Reduce o Reduce-Reduce')
+        # return
+
+    options = [
+        'Tabla de parsing',
+        'Autómata LALR(1)',
+        'Parsear cadena'
+    ]
+
+    selected = st.multiselect('', options)
+
+    if options[0] in selected:
+        lalr1_parser._build_parsing_table()
+        goto = LR_table_to_dataframe(lalr1_parser.goto)
+        action = LR_table_to_dataframe(lalr1_parser.action)
+        st.title('GOTO')
+        st.write(goto)
+        st.title('Action')
+        st.write(action)
+    if options[1] in selected:
+        st.title('Automata LR(0)')
+        automaton = build_lalr_automaton(lalr1_parser.G.AugmentedGrammar(True))
+        st.graphviz_chart(str(automaton.graph()))
+    if options[2] in selected:
+        render_parser(G, 'método LALR(1)', lalr1_parser)

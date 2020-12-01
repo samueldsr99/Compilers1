@@ -38,14 +38,11 @@ def render_regular_automaton(G):
     dfa = gp.grammar_to_dfa(G)
     extended = NFA.extend_automaton(dfa)
 
-    dfa.graph().write_png(os.path.join('data', 'dfa.png'))
-    extended.graph().write_png(os.path.join('data', 'ext.png'))
-
     st.subheader('Autómata finito determinista obtenido de la gramática:')
-    st.image(os.path.join('data', 'dfa.png'))
+    st.graphviz_chart(str(dfa.graph()))
 
     st.subheader('Autómata extendido para hallar la expresión regular:')
-    st.image(os.path.join('data', 'ext.png'))
+    st.graphviz_chart(str(extended.graph()))
 
     regex = extended.get_regex()
 

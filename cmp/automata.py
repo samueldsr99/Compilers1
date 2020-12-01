@@ -145,6 +145,7 @@ class State:
         return str(self.state)
 
     def __hash__(self):
+        print(type(self.state))
         return hash(self.state)
 
     def __iter__(self):

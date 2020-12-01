@@ -1,6 +1,7 @@
-S
-a b c
-S A B
-S -> a A
-A -> a B
-B -> b
+E
+int * + ( )
+E T X Y
+E -> T X
+X -> + E | epsilon
+T -> int Y | ( E )
+Y -> * T | epsilon
