@@ -43,7 +43,7 @@ def parsing():
         'LL(1)': parser_LL1,
         'LR(1)': parser_LR1,
         'SLR(1)': parser_SLR1,
-        'LALR(1)': parser_LALR1
+        # 'LALR(1)': parser_LALR1
     }
 
     option = st.selectbox('Algoritmo de Parsing', list(wrapper.keys()))
