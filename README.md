@@ -77,4 +77,5 @@ Finalemente, en el apartado de **Parsing**, se puede seleccionar uno de los tipo
 
 #### TODO
 
-Implementar parser LALR
+* Implementar parser LALR
+* Reportar cadena de conflicto
