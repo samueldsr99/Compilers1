@@ -1,7 +1,5 @@
 E
 int * + ( )
-E T X Y
-E -> T X
-X -> + E | epsilon
-T -> int Y | ( E )
-Y -> * T | epsilon
+T X Y
+E -> T + E | T
+T -> int * T | int | ( E )
