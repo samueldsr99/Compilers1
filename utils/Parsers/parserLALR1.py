@@ -54,52 +54,6 @@ def build_lalr_automaton(G):
     return start
 
 
-# def get_lookaheads(st, prop, table, firsts):
-#     for kernel in st.state:
-#         closure = closure_lr1([Item(kernel.production, kernel.pos, ('#',))], firsts)
-#         for item in closure:
-#             if item.IsReduceItem:
-#                 continue
-
-#             next_state = st.get(item.NextSymbol.name)
-#             next_item = item.NextItem().Center()
-#             if '#' in item.lookaheads:
-#                 prop[st, kernel].append((next_state, next_item))
-#             table[next_state, next_item].extend(item.lookaheads - {'#'})
-
-
-# def build_lalr_automaton(G):
-#     automaton = build_LR0_automaton(G)
-
-#     firsts = compute_firsts(G)
-#     firsts[G.EOF] = ContainerSet(G.EOF)
-
-#     print(type(automaton))
-#     for st in automaton:
-#         print(st, st.state, type(st.state))
-#     table = {(st, item): ContainerSet() for st in automaton for item in st.state}
-#     cl = {(st, item): [] for st in automaton for item in st.state}
-
-#     for st in automaton:
-#         get_lookaheads(st, cl, table, firsts)
-#     del firsts['#']
-
-#     start_item = list(automaton.state).pop()
-#     table[automaton, start_item] = ContainerSet(G.EOF)
-
-#     pending = True
-#     while pending:
-#         pending = False
-#         for from_state, from_item in cl:
-#             for to_state, to_item in cl[from_state, from_item]:
-#                 change |= table[to_state, to_item].extend(table[from_state, from_item])
-
-#     for st in automaton:
-#         st.state = frozenset(closure_lr1(st.state, firsts))
-
-#     return automaton
-
-
 class LALRParser(ShiftReduceParser):
     def _build_parsing_table(self):
         G = self.G.AugmentedGrammar()

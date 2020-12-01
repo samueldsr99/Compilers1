@@ -2,11 +2,14 @@
 
 ## Grammar Analyser.
 
+## Estudiantes
+* Enmanuel Verdesia Suárez
+* Samuel David Suárez Rodríguez
+
 ### Índice
 - Introducción
 - Requerimientos
 - Uso
-- Detalles de Implementación
 - TODO
 
 ### Introducción
@@ -27,22 +30,44 @@ Los análisis que se realizan dada una gramática como entrada son los siguiente
 - Se muestra una versión de la gramática sin producciones innecesarias, recursión izquierda y prefijos comunes.
 
 ### Requerimientos
-¿?
+```
+python3
+pip
+
+streamlit==0.67.1
+pandas==1.1.3
+pydot==1.4.1
+```
+
 ### Uso
 Para iniciar la ejecución, una vez cumplidos los requerimientos, se usa el siguiente comando en la carpeta raíz del proyecto.
 
-    streamlit run index2.py
+```bash
+streamlit run index2.py
+```
 
 El procesamiento de las gramáticas se realiza sobre una plataforma web. Hay 4 opciones disponibles:
 
 <img src="images/options.png" width="200">
 
-En la primera opcion es posible definir una gramatica insertando terminales, no terminales y producciones. El formato de las producciones es de la siguiente forma:
+En la primera opcion es posible definir una gramatica insertando terminales, no terminales y producciones. Por ejemplo de la siguiente manera:
 
-    E -> T X
-    X -> + E | epsilon
-    T -> int Y | ( E )
-    Y -> * T | epsilon
+```
+E
+```
+```
+int * + ( )
+```
+```
+E T X Y
+```
+```
+E -> T + E
+E -> T
+T -> int * T
+T -> int
+T -> ( E )
+```
 
 En **Detalles de la Gramatica** se puede observar la gramática definida, así como la misma gramática simplificada (sin recursión izquierda inmediata, producciones innecesarias y prefijos comunes). Además se puede visualiar **si la gramática es regular** es el autómata finito determinista que reconoce el lenguaje que ella genera.
 
@@ -50,4 +75,6 @@ En el trecer punto, están disponible los _First_ y los _Follows_ calculados par
 
 Finalemente, en el apartado de **Parsing**, se puede seleccionar uno de los tipos de pasrers disponibles, _LL(1)_, _LR(1)_ y _SLR(1). Según el parser, y si la gramática puede ser parseada con dicho parser, se puede observar la tabla de parseo y el autómata correspondiente. Además está la opción de parsear una cadena provista con el método escogido.
 
-### Detalles de Implementación
+#### TODO
+
+Implementar parser LALR
