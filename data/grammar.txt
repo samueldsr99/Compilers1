@@ -1,5 +1,7 @@
-E
-int * + ( )
-T X Y
-E -> T + E | T
-T -> int * T | int | ( E )
+<statement>
+if then else bool id
+<statement> <expression>
+<statement> -> if <expression> then <statement>
+<statement> -> if <expression> then <statement> else <statement>
+<expression> -> bool
+<statement> -> id

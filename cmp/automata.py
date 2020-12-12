@@ -108,7 +108,7 @@ class State:
             tmp = [s for s in closure]
             for s in tmp:
                 for epsilon_state in s.epsilon_transitions:
-                        closure.add(epsilon_state)
+                    closure.add(epsilon_state)
         return closure
 
     @property

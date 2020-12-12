@@ -6,8 +6,12 @@ from utils.first_follow import (compute_firsts, compute_follows,
                                 compute_local_first)
 
 
-def build_parsing_table(G, firsts, follows):
+def build_parsing_table(G, firsts=None, follows=None):
     # init parsing table
+    if firsts is None:
+        firsts = compute_firsts(G)
+    if follows is None:
+        follows = compute_follows(G, firsts)
     M = {}
     
     # P: X -> alpha
@@ -51,8 +55,9 @@ def build_parsing_table(G, firsts, follows):
     # parsing table is ready!!!
     return M
 
+
 def isLL1(G, M=None):
-    if not M:
+    if M is None:
         firsts = compute_firsts(G)
         follows = compute_follows(G, firsts)
         M = build_parsing_table(G, firsts, follows)
@@ -61,6 +66,15 @@ def isLL1(G, M=None):
         if len(M[cell]) > 1:
             return False
     return True
+
+
+def get_ll1_conflict(M):
+    for cell in M:
+        if len(M[cell]) > 1:
+            return cell
+    
+    return None
+
 
 def metodo_predictivo_no_recursivo(G, M=None, firsts=None, follows=None):
 

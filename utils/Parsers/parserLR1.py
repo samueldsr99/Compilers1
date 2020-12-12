@@ -3,7 +3,11 @@ from cmp.pycompiler import Item
 from cmp.utils import ContainerSet
 from utils.first_follow import compute_firsts, compute_local_first
 from cmp.automata import State, multiline_formatter
-from utils.Parsers.parserSR import ShiftReduceParser
+from utils.Parsers.parserSR import (
+    ShiftReduceParser,
+    SHIFT_REDUCE,
+    REDUCE_REDUCE,
+)
 
 
 def expand(item, firsts):
@@ -129,8 +133,13 @@ class LR1Parser(ShiftReduceParser):
                     else:
                         self._register(self.goto, (idx, next_symbol), goto_id)
 
-    @staticmethod
-    def _register(table, key, value):
-        if key in table and table[key] != value:
-            raise Exception('Shift-Reduce or Reduce-Reduce conflict!!!')
-        table[key] = value
+    # @staticmethod
+    # def _register(table, key, value):
+    #     if key in table and value not in table[key]:
+    #         if table[key][0][0] == LR1Parser.REDUCE and value[0] == LR1Parser.REDUCE:
+    #             type = REDUCE_REDUCE
+    #         else:
+    #             type = SHIFT_REDUCE
+    #         table[key].append(value)
+    #         raise ConflictException(type, (key[0], key[1]), [table[key][0], value])
+    #     table[key] = [value]

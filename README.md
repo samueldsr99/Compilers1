@@ -43,7 +43,7 @@ pydot==1.4.1
 Para iniciar la ejecución, una vez cumplidos los requerimientos, se usa el siguiente comando en la carpeta raíz del proyecto.
 
 ```bash
-streamlit run index2.py
+streamlit run index.py
 ```
 
 El procesamiento de las gramáticas se realiza sobre una plataforma web. Hay 4 opciones disponibles:

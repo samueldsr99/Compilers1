@@ -20,11 +20,10 @@ def LL1_to_dataframe(G):
         matrix.append([])
         for column in columns:
             try:
-                production = M[row, column][0]
-                matrix[-1].append(
-                    str(production.Left) + ' -> ' +
-                    str(production.Right)
-                )
+                productions = ""
+                for prod in M[row, column]:
+                    productions += f'{prod.Left} -> {prod.Right}\n'
+                matrix[-1].append(productions)
             except KeyError:
                 matrix[-1].append(' ')
 
