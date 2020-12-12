@@ -103,10 +103,10 @@ def build_LR1_automaton(G):
 
 
 class LR1Parser(ShiftReduceParser):
-    def _build_parsing_table(self):
+    def _build_parsing_table(self, automaton=None):
         G = self.G.AugmentedGrammar(True)
 
-        automaton = build_LR1_automaton(G)
+        automaton = automaton(G) if automaton else build_LR1_automaton(G)
         for i, node in enumerate(automaton):
             if self.verbose:
                 print(i, '\t', '\n\t '.join(str(x) for x in node.state), '\n')

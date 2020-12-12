@@ -221,7 +221,10 @@ def generate_lr_conflict_string(G, parser):
 
     assert not isinstance(production, int), f'Error:{production}'
     path = sentence_path(automaton, states[st], symbol, production)
-    print(f'path: {path}')
+
+    for p in path:
+        print(f'path: {p}')
+    input()
 
     firsts = compute_firsts(G)
     follows = compute_follows(G, firsts)

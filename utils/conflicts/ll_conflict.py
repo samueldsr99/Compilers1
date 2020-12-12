@@ -107,7 +107,7 @@ def generate_ll1_conflict_string(G, table, pair):
 
     sentence, _ = shortest_production_path(G, left)
     sentence_forms = compute_sentence(G)
-    sentence_forms_fixxed = compute_fixxed_sentence(G, right, sentence_forms)
+    fixed_sentence = compute_fixxed_sentence(G, right, sentence_forms)
 
     i = tuple(sentence).index(left)
 
@@ -120,14 +120,14 @@ def generate_ll1_conflict_string(G, table, pair):
     ss1 = Sentence()
     for symbol in s1:
         if symbol == x1:
-            ss1 += sentence_forms_fixxed[symbol]
+            ss1 += fixed_sentence[symbol]
         else:
             ss1 += sentence_forms[symbol]
 
     ss2 = Sentence()
     for symbol in s2:
         if symbol == x2:
-            ss2 += sentence_forms_fixxed[symbol]
+            ss2 += fixed_sentence[symbol]
         else:
             ss2 += sentence_forms[symbol]
     

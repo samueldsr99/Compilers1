@@ -4,6 +4,7 @@ Parsing Section
 import streamlit as st
 
 import utils.grammar_processing as gp
+from utils.derivation_tree import LLDerivationTree, LRDerivationTree
 from utils.parser import (
     isLL1,
     metodo_predictivo_no_recursivo,
@@ -23,7 +24,7 @@ from utils.Parsers.parserSLR1 import SLR1Parser, build_LR0_automaton
 from utils.Parsers.parserLALR1 import LALR1Parser, build_LALR1_automaton
 
 
-def render_parser(G, algorithm: str, parser):
+def render_parser(G, algorithm: str, parser, is_ll1=False):
     """
     Render Parser Subsection
     """
@@ -36,15 +37,17 @@ def render_parser(G, algorithm: str, parser):
         tokens = tokenize(G, w)
 
         if isinstance(tokens, list):
-            left_parse = parser(tokens)
-            if not left_parse:
+            productions = parser(tokens)
+            if not productions:
                 st.error("Error en parsing.\
                     La cadena no pertenece al lenguaje.")
             else:
                 st.success("OK")
-                st.subheader("Producciones a aplicar:")
-                for production in left_parse:
-                    st.text(f'{production.Left} -> {production.Right}')
+                if is_ll1:
+                    tree = LLDerivationTree(productions)
+                else:
+                    tree = LRDerivationTree(productions)
+                st.graphviz_chart(str(tree.graph()))
         else:
             st.error("Error en tokenize: " + tokens)
 
@@ -90,10 +93,11 @@ def parser_LL1():
         # Get conflicts
         pair = get_ll1_conflict(M)
         c1, c2 = M[pair[0], pair[1]][:2]
-        st.subheader('Conflicto:')
+        st.subheader('Producciones de conflicto:')
         st.code(f'{c1}\n{c2}')
 
         s1, s2 = generate_ll1_conflict_string(G, M, pair)
+        st.subheader('Cadenas de conflicto')
         st.code(f'{s1}\n{s2}')
 
     selected = st.multiselect('', options)
@@ -104,7 +108,7 @@ def parser_LL1():
         st.write(frame)
     if len(options) > 1 and options[1] in selected:
         parser = metodo_predictivo_no_recursivo(G)
-        render_parser(G, 'método predictivo no recursivo', parser)
+        render_parser(G, 'método predictivo no recursivo', parser, is_ll1=True)
 
 
 def parser_LR1():
@@ -143,10 +147,9 @@ def parser_LR1():
             st.code(f'{conf.value[0]}\n{conf.value[1]}')
         
         # TODO Report conflict string...
-        # Parsing can not stop, remove exception
-        # r1, r2 = generate_lr_conflict_string(G, lr1_parser)
-        # st.subheader('Cadenas de conflicto:')
-        # st.code(f'{r1}\n{r2}')
+        r1, r2 = generate_lr_conflict_string(G, lr1_parser)
+        st.subheader('Cadenas de conflicto:')
+        st.code(f'{r1}\n{r2}')
 
     selected = st.multiselect('', options)
 
@@ -178,23 +181,37 @@ def parser_SLR1():
             o la gramatica definida no es correcta')
         return
 
-    G = result[1]
-    try:
-        slr1_parser = SLR1Parser(G)
-    except Exception:
-        st.error('La gramática definida tiene conflictos\
-            Shift-Reduce o Reduce-Reduce')
-        return
-
     options = [
         'Tabla de parsing',
         'Autómata LR0',
         'Parsear cadena'
     ]
 
+    G = result[1]
+
+    slr1_parser = SLR1Parser(G)
+    if len(slr1_parser.conflicts) > 0:
+        options.remove('Parsear cadena')
+
+        if slr1_parser.conflicts[0].type == SHIFT_REDUCE:
+            st.error('La gramática definida tiene conflictos\
+                Shift-Reduce')
+        if slr1_parser.conflicts[0].type == REDUCE_REDUCE:
+            st.error('La gramática definida tiene conflictos\
+                Reduce-Reduce')
+
+        for conf in slr1_parser.conflicts:
+            st.code(f'{conf.value[0]}\n{conf.value[1]}')
+        
+        # TODO Report conflict string...
+        r1, r2 = generate_lr_conflict_string(G, slr1_parser)
+        st.subheader('Cadenas de conflicto:')
+        st.code(f'{r1}\n{r2}')
+
+
     selected = st.multiselect('', options)
 
-    if options[0] in selected:
+    if 'Tabla de parsing' in selected:
         slr1_parser._build_parsing_table()
         goto = LR_table_to_dataframe(slr1_parser.goto)
         action = LR_table_to_dataframe(slr1_parser.action)
@@ -202,11 +219,11 @@ def parser_SLR1():
         st.write(goto)
         st.title('Action')
         st.write(action)
-    if options[1] in selected:
+    if 'Autómata LR0' in selected:
         st.title('Automata LR(0)')
         automaton = build_LR0_automaton(slr1_parser.G.AugmentedGrammar(True))
         st.graphviz_chart(str(automaton.graph()))
-    if options[2] in selected:
+    if 'Parsear cadena' in selected:
         render_parser(G, 'método SLR(1)', slr1_parser)
 
 
@@ -222,25 +239,37 @@ def parser_LALR1():
             o la gramatica definida no es correcta')
         return
 
-    G = result[1]
-
-    try:
-        lalr1_parser = LALR1Parser(G)
-    except Exception as e:
-        st.error(e)
-        st.error('La gramática definida tiene conflictos\
-            Shift-Reduce o Reduce-Reduce')
-        return
-
     options = [
         'Tabla de parsing',
         'Autómata LALR(1)',
         'Parsear cadena'
     ]
 
+    G = result[1]
+
+    lalr1_parser = LALR1Parser(G)
+
+    if len(lalr1_parser.conflicts) > 0:
+        options.remove('Parsear cadena')
+
+        if lalr1_parser.conflicts[0].type == SHIFT_REDUCE:
+            st.error('La gramática definida tiene conflictos\
+                Shift-Reduce')
+        if lalr1_parser.conflicts[0].type == REDUCE_REDUCE:
+            st.error('La gramática definida tiene conflictos\
+                Reduce-Reduce')
+
+        for conf in lalr1_parser.conflicts:
+            st.code(f'{conf.value[0]}\n{conf.value[1]}')
+        
+        # TODO Report conflict string...
+        r1, r2 = generate_lr_conflict_string(G, lalr1_parser)
+        st.subheader('Cadenas de conflicto:')
+        st.code(f'{r1}\n{r2}')
+
     selected = st.multiselect('', options)
 
-    if options[0] in selected:
+    if 'Tabla de parsing' in selected:
         lalr1_parser._build_parsing_table()
         goto = LR_table_to_dataframe(lalr1_parser.goto)
         action = LR_table_to_dataframe(lalr1_parser.action)
@@ -248,9 +277,9 @@ def parser_LALR1():
         st.write(goto)
         st.title('Action')
         st.write(action)
-    if options[1] in selected:
+    if 'Autómata LALR(1)' in selected:
         st.title('Automata LR(0)')
         automaton = build_LALR1_automaton(lalr1_parser.G.AugmentedGrammar(True))
         st.graphviz_chart(str(automaton.graph()))
-    if options[2] in selected:
+    if 'Parsear cadena' in selected:
         render_parser(G, 'método LALR(1)', lalr1_parser)

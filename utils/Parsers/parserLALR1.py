@@ -63,5 +63,8 @@ def build_LALR1_automaton(G, firsts=None):
 
 
 class LALR1Parser(LR1Parser):
+    def _build_parsing_table(self):
+        super()._build_parsing_table(automaton=build_LALR1_automaton)
+
     def _build_automaton(self):
         return build_LALR1_automaton(self.augmented_G, firsts=self.firsts)
