@@ -75,7 +75,3 @@ En el trecer punto, están disponible los _First_ y los _Follows_ calculados par
 
 Finalemente, en el apartado de **Parsing**, se puede seleccionar uno de los tipos de pasrers disponibles, _LL(1)_, _LR(1)_ y _SLR(1). Según el parser, y si la gramática puede ser parseada con dicho parser, se puede observar la tabla de parseo y el autómata correspondiente. Además está la opción de parsear una cadena provista con el método escogido.
 
-#### TODO
-
-* Implementar parser LALR
-* Reportar cadena de conflicto
