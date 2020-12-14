@@ -26,10 +26,6 @@ def fill_sentences_dict(G):
 
 
 def fill_fixed_sentences_dict(G, t, sentence_forms):
-    """
-    For each non terminal 'X' in the Grammar G compute a sentence of terminals that start with t 'tS'
-    where X ->* tS
-    """
     fixed_sentences = {t: Sentence(t)}
 
     change = True
@@ -52,25 +48,20 @@ def fill_fixed_sentences_dict(G, t, sentence_forms):
     return fixed_sentences
 
 
-def shortest_production_path(G, x):
-    """
-    Compute the shortest poduction path from start symbol of
-    Grammar G to a sentence form thad Contains the Non Temrinal X
-    """
-    queue = deque([x])
-    sentence_form = {x: Sentence(x)}
-    production_path = {x: [Production(x, Sentence(x))]}  # Eliminar esta linea de testeo
+def get_path(G, x):
+    pending = deque([x])
+    ret = {x: Sentence(x)}
 
     productions = set(G.Productions)
-    while queue:
-        current = queue.popleft()
+    while pending:
+        current = pending.popleft()
 
-        visited_productions = set()
+        visited = set()
         for production in productions:
 
             head, body = production
 
-            if head in sentence_form:
+            if head in ret:
                 continue
 
             sentence = Sentence()
@@ -78,33 +69,26 @@ def shortest_production_path(G, x):
             for i, symbol in enumerate(body):
                 if symbol == current:
                     current_belong = True
-                    sentence += sentence_form[current]
+                    sentence += ret[current]
                 else:
                     sentence += symbol
 
             if current_belong:
-                queue.append(head)
-                sentence_form[head] = sentence
-                production_path[head] = [production] + production_path[current]
-                visited_productions.add(production)
+                pending.append(head)
+                ret[head] = sentence
+                visited.add(production)
 
-        productions -= visited_productions
+        productions -= visited
 
-    assert G.startSymbol in sentence_form, f'{x} is not reacheable from start symbol {G.startSymbol}'
-
-    return sentence_form[G.startSymbol], production_path[G.startSymbol][:-1]
+    return ret[G.startSymbol]
 
 
 def generate_ll1_conflict_string(G, table, pair):
-    """
-    Generates conflict string given a parser and it's
-    conflict nonterminal-terminal pair
-    """
     left, right = pair
 
     c1, c2 = table[left, right][:2]
 
-    sentence, _ = shortest_production_path(G, left)
+    sentence = get_path(G, left)
     sentence_forms = fill_sentences_dict(G)
     fixed_sentence = fill_fixed_sentences_dict(G, right, sentence_forms)
 
@@ -113,21 +97,21 @@ def generate_ll1_conflict_string(G, table, pair):
     x1 = c1.Right[0]
     x2 = c2.Right[0]
 
-    s1 = Sentence(*(sentence[:i] + tuple(c1.Right) + sentence[i + 1:]))
-    s2 = Sentence(*(sentence[:i] + tuple(c2.Right) + sentence[i + 1:]))
+    str1 = Sentence(*(sentence[:i] + tuple(c1.Right) + sentence[i + 1:]))
+    str2 = Sentence(*(sentence[:i] + tuple(c2.Right) + sentence[i + 1:]))
 
-    ss1 = Sentence()
-    for symbol in s1:
+    ret1 = Sentence()
+    for symbol in str1:
         if symbol == x1:
-            ss1 += fixed_sentence[symbol]
+            ret1 += fixed_sentence[symbol]
         else:
-            ss1 += sentence_forms[symbol]
+            ret1 += sentence_forms[symbol]
 
-    ss2 = Sentence()
-    for symbol in s2:
+    ret2 = Sentence()
+    for symbol in str2:
         if symbol == x2:
-            ss2 += fixed_sentence[symbol]
+            ret2 += fixed_sentence[symbol]
         else:
-            ss2 += sentence_forms[symbol]
+            ret2 += sentence_forms[symbol]
     
-    return ss1, ss2
+    return ret1, ret2
