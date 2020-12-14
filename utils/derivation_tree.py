@@ -1,18 +1,27 @@
 import pydot
 
 
-class DerivationTreeNode:
-    def __init__(self, symbol, father=None):
+class Node:
+    """
+    Base Node class for derivation tree
+    """
+    def __init__(self, symbol, parent=None):
+        self.children = []
         self.symbol = symbol
-        self.father = father
-        self.childs = []
+        self.parent = parent
 
-    def add_child(self, symbol):
-        self.childs.append(DerivationTreeNode(symbol, father=self))
-        return self.childs[-1]
+    def append_child(self, symbol):
+        """
+        Adds a child node to self node
+        """
+        self.children.append(Node(symbol, parent=self))
+        return self.children[-1]
 
-    def go_root(self):
-        return self if self.father is None else self.father.go_root()
+    def root(self):
+        """
+        Returns reference to the root node
+        """
+        return self if self.parent is None else self.parent.root()
 
     def __str__(self):
         return str(self.symbol)
@@ -30,20 +39,19 @@ class DerivationTree:
 
     def graph(self):
         G = pydot.Dot(graph_type='graph', rankdir='TD', margin=0.1)
-        stack = [self.root]
+        pending = [self.root]
 
-        while stack:
-            current = stack.pop()
+        while pending:
+            current = pending.pop()
             ids = id(current)
             G.add_node(pydot.Node(name=ids, label=str(current), shape='circle'))
-            for child in current.childs:
-                stack.append(child)
+            for child in current.children:
+                pending.append(child)
                 G.add_node(pydot.Node(name=id(child), label=str(child), shape='circle'))
                 G.add_edge(pydot.Edge(ids, id(child)))
 
         return G
 
-    # noinspection PyUnresolvedReferences
     def _repr_svg_(self):
         try:
             return self.graph().create_svg().decode('utf8')
@@ -63,18 +71,18 @@ class LLDerivationTree(DerivationTree):
         try:
             head, body = next(productions)
         except StopIteration:
-            return node.go_root()
+            return node.root()
 
         if node is None:
-            node = DerivationTreeNode(head)
+            node = Node(head)
 
         assert node.symbol == head
 
         for symbol in body:
             if symbol.IsTerminal:
-                node.add_child(symbol)
+                node.append_child(symbol)
             elif symbol.IsNonTerminal:
-                next_node = node.add_child(symbol)
+                next_node = node.append_child(symbol)
                 self._derivation(productions, next_node)
         return node
 
@@ -88,18 +96,18 @@ class LRDerivationTree(DerivationTree):
         try:
             head, body = next(productions)
         except StopIteration:
-            return node.go_root()
+            return node.root()
 
         if node is None:
-            node = DerivationTreeNode(head)
+            node = Node(head)
 
         assert node.symbol == head
 
         for symbol in reversed(body):
             if symbol.IsTerminal:
-                node.add_child(symbol)
+                node.append_child(symbol)
             elif symbol.IsNonTerminal:
-                next_node = node.add_child(symbol)
+                next_node = node.append_child(symbol)
                 self._derivation(productions, next_node)
-        node.childs.reverse()
+        node.children.reverse()
         return node
