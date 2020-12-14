@@ -1,7 +1,7 @@
-<statement>
-if then else bool id
-<statement> <expression>
-<statement> -> if <expression> then <statement>
-<statement> -> if <expression> then <statement> else <statement>
-<expression> -> bool
-<statement> -> id
+E
+int * + ( )
+E T X Y
+E -> T X
+X -> + E | epsilon
+T -> int Y | ( E )
+Y -> * T | epsilon

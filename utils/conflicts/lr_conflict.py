@@ -44,19 +44,25 @@ def path_from(s):
 
     while queue:
         current = queue.popleft()
-        print(current.state, type(current.state))
-        input()
+        print('~' * 160)
+        print(f'current: {current.state}')
+        print('~' * 160)
+        # input()
 
         # if current in visited:
         #     continue
 
+        # visited.add(current)
+
         for symbol in current.transitions:
             dest = current.get(symbol)
-            if dest in visited:
-                continue
-            queue.append(dest)
-            visited.add(dest)
-            parents[dest] = current, symbol
+            if not dest in visited:
+                print(f'with symbol: {symbol}')
+                print(f'dest: {dest}')
+                queue.append(dest)
+                parents[dest] = current, symbol
+                visited.add(dest)
+        print('_' * 160)
 
     return parents
 
@@ -73,6 +79,7 @@ def path_from_to(source, dest):
             'source state' -> 'transition symbol' -> 'state' -> ... -> 'transition symbol' -> 'dest state'
     """
     parents = path_from(source)
+    print(f'source: {source}')
 
     path = [dest]
     s = dest
@@ -126,6 +133,11 @@ def reduce(s, p, state_list, lookahead):
             's' -> 'transition symbol' -> 'state' -> ... -> 'transition symbol' -> 'dest state' -> 'lookahead'
     """
     states = {s}
+    print("+++++++++++++++++++++++++++")
+    print(s)
+    print(p)
+    print(state_list)
+    print(lookahead)
 
     stack = list(p.Right)
 
@@ -151,6 +163,10 @@ def sentence_path(init, conflict_state, symbol, p):
     """
     states = [s for s in init]
     rpath = reduce(conflict_state, p, states, symbol)
+    print('rpath')
+    for p in rpath:
+        print(p)
+    input()
     lpath = path_from_to(init, rpath[0])
     return lpath + rpath[1:]
 
@@ -179,15 +195,26 @@ def expand_path(init, path, follows):
             continue
 
         reductors = [item for item in current.state if item.production.Left == current and item in table[current]]
+        
+        for item in current.state:
+            print(f'item: {item}')
+            print(f'table[current]: {table[current]}')
+            print(f'item.production.Left: {item.production.Left}, type: {type(item.production.Left)}')
+            print(f'type current: {type(current)}')
+            print(f'item in table: {item in table[current]}')
+
+
         print(f'reductors: {reductors}')
         input()
 
         while reductors:
-            reductor = reductors.pop()
-            print(f'reductor: {reductor}')
-            input()
+            reductor = reductors.pop()            
 
             subpath = guided_path(current, reductor.production.Right)
+
+            print(f'reductor: {reductor}')
+            print(f'subpath: {subpath}')
+            input()
 
             last = subpath.pop()
             ritem = [item for item in last.state if item.IsReduceItem and item.production == reductor.production][0]
@@ -208,18 +235,26 @@ def generate_lr_conflict_string(G, parser):
     for it, node in enumerate(automaton):
         states[it] = node
 
-    for conf in parser.conflicts:
-        print(conf.key, conf.value)
-        if conf.value[0][0] == 'REDUCE':
-            st, symbol = conf.key
-            production = conf.value[0][1]
-        if conf.value[1][0] == 'REDUCE':
-            st, symbol = conf.key
-            production = conf.value[1][1]
+    # for conf in parser.conflicts:
+    #     print(f'conf.key {conf.key}, conf.value {conf.value}')
+    #     if conf.value[0][0] == 'REDUCE':
+    #         st, symbol = conf.key
+    #         production = conf.value[0][1]
+    #         print(states[st])
+    #     if conf.value[1][0] == 'REDUCE':
+    #         st, symbol = conf.key
+    #         production = conf.value[1][1]
+    #         print(states[st])
+    
+    st, symbol = parser.conflicts.key
+    _, production = parser.action[st, symbol].pop()
+    print(f'state: {st}')
+    print(f'symbol: {symbol}')
 
     assert (st is not None and production is not None and symbol is not None)
 
-    assert not isinstance(production, int), f'Error:{production}'
+    print(production)
+    input()
     path = sentence_path(automaton, states[st], symbol, production)
 
     for p in path:
@@ -229,6 +264,6 @@ def generate_lr_conflict_string(G, parser):
     firsts = compute_firsts(G)
     follows = compute_follows(G, firsts)
 
-    expanded = expand_path(automaton, path, follows)
+    # expanded = expand_path(automaton, path, follows)
 
-    return path, expanded
+    return path #, expanded

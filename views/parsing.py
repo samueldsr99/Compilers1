@@ -147,9 +147,9 @@ def parser_LR1():
             st.code(f'{conf.value[0]}\n{conf.value[1]}')
         
         # TODO Report conflict string...
-        r1, r2 = generate_lr_conflict_string(G, lr1_parser)
-        st.subheader('Cadenas de conflicto:')
-        st.code(f'{r1}\n{r2}')
+        # r1, r2 = generate_lr_conflict_string(G, lr1_parser)
+        # st.subheader('Cadenas de conflicto:')
+        # st.code(f'{r1}\n{r2}')
 
     selected = st.multiselect('', options)
 
@@ -204,9 +204,9 @@ def parser_SLR1():
             st.code(f'{conf.value[0]}\n{conf.value[1]}')
         
         # TODO Report conflict string...
-        r1, r2 = generate_lr_conflict_string(G, slr1_parser)
-        st.subheader('Cadenas de conflicto:')
-        st.code(f'{r1}\n{r2}')
+        # r1, r2 = generate_lr_conflict_string(G, slr1_parser)
+        # st.subheader('Cadenas de conflicto:')
+        # st.code(f'{r1}\n{r2}')
 
 
     selected = st.multiselect('', options)
@@ -263,9 +263,9 @@ def parser_LALR1():
             st.code(f'{conf.value[0]}\n{conf.value[1]}')
         
         # TODO Report conflict string...
-        r1, r2 = generate_lr_conflict_string(G, lalr1_parser)
-        st.subheader('Cadenas de conflicto:')
-        st.code(f'{r1}\n{r2}')
+        # r1, r2 = generate_lr_conflict_string(G, lalr1_parser)
+        # st.subheader('Cadenas de conflicto:')
+        # st.code(f'{r1}\n{r2}')
 
     selected = st.multiselect('', options)
 
@@ -278,7 +278,7 @@ def parser_LALR1():
         st.title('Action')
         st.write(action)
     if 'Autómata LALR(1)' in selected:
-        st.title('Automata LR(0)')
+        st.title('Automata LALR(1)')
         automaton = build_LALR1_automaton(lalr1_parser.G.AugmentedGrammar(True))
         st.graphviz_chart(str(automaton.graph()))
     if 'Parsear cadena' in selected:

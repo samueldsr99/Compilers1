@@ -5,10 +5,7 @@ from collections import deque
 from cmp.pycompiler import Sentence, Production
 
 
-def compute_sentence(G):
-    """
-    For each non terminal 'X' in the Grammar G compute a sentence of terminals 'S' where X ->* S
-    """
+def fill_sentences_dict(G):
     sentence = {t: Sentence(t) for t in G.terminals}
 
     change = True
@@ -28,29 +25,31 @@ def compute_sentence(G):
     return sentence
 
 
-def compute_fixxed_sentence(G, t, sentence_forms):
+def fill_fixed_sentences_dict(G, t, sentence_forms):
     """
     For each non terminal 'X' in the Grammar G compute a sentence of terminals that start with t 'tS'
     where X ->* tS
     """
-    fixxed_sentence = {t: Sentence(t)}
+    fixed_sentences = {t: Sentence(t)}
 
     change = True
     while change:
-        n = len(fixxed_sentence)
+        n = len(fixed_sentences)
         for production in G.Productions:
-            head, body = production
+            left, right = production
 
-            if head in fixxed_sentence:
+            if left in fixed_sentences:
                 continue
 
-            if not body.IsEpsilon and body[0] in fixxed_sentence:
-                fixxed_sentence[head] = Sentence(
-                    *([fixxed_sentence[body[0]]] + [sentence_forms[symbol] for symbol in body[1:]]))
+            if not right.IsEpsilon and right[0] in fixed_sentences:
+                fixed_sentences[left] = \
+                Sentence(
+                    *([fixed_sentences[right[0]]] + [sentence_forms[symbol] for symbol in right[1:]])
+                )
 
-        change = n != len(fixxed_sentence)
+        change = n != len(fixed_sentences)
 
-    return fixxed_sentence
+    return fixed_sentences
 
 
 def shortest_production_path(G, x):
@@ -106,8 +105,8 @@ def generate_ll1_conflict_string(G, table, pair):
     c1, c2 = table[left, right][:2]
 
     sentence, _ = shortest_production_path(G, left)
-    sentence_forms = compute_sentence(G)
-    fixed_sentence = compute_fixxed_sentence(G, right, sentence_forms)
+    sentence_forms = fill_sentences_dict(G)
+    fixed_sentence = fill_fixed_sentences_dict(G, right, sentence_forms)
 
     i = tuple(sentence).index(left)
 
